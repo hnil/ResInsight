@@ -34,7 +34,7 @@ include_directories(
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   set(ERT_ROOT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/Ert" CACHE  DIRECTORY "Root path for ERT installation to build against")
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set(ERT_ROOT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/Ert" CACHE  DIRECTORY "Root path for ERT installation to build against"))
+  set(ERT_ROOT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/Ert" CACHE  DIRECTORY "Root path for ERT installation to build against")
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   if (CMAKE_CL_64)
     set(ERT_ROOT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/Ert-windows-x64" CACHE  DIRECTORY "Root path for ERT installation to build against")
@@ -102,14 +102,11 @@ endif()
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
    list(APPEND ERT_LIBRARY_LIST lapack z)  
-<<<<<<< HEAD
 endif()
+
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
    list(APPEND ERT_LIBRARY_LIST lapack z)  
 endif()	
-=======
-endif() 
->>>>>>> origin/master
 
 include_directories( ${ERT_INCLUDE_LIST} )
 # Ert configuration complete
