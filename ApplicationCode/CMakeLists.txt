@@ -32,13 +32,15 @@ include_directories(
 # variable you can point to a different ERT distribution.
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-   set(ERT_ROOT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/Ert")
+    set(ERT_ROOT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/Ert")
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set(ERT_ROOT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/Ert")
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  if (${CMAKE_SIZEOF_VOID_P} MATCHES "8" )
-    set(ERT_ROOT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/Ert-windows-x64")
-  else()
-    set(ERT_ROOT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/Ert-windows")
-  endif()
+    if (CMAKE_CL_64)
+        set(ERT_ROOT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/Ert-windows-x64")
+    else()
+        set(ERT_ROOT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/Ert-windows")
+    endif()
 endif()
 
 	
@@ -84,6 +86,12 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
          ${ERT_ROOT_PATH}/lib/libert_util.a
          ${ERT_ROOT_PATH}/lib/libgeometry.a
          ${ERT_ROOT_PATH}/lib/libwell.a )
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set( ERT_LIBRARY_LIST 
+         ${ERT_ROOT_PATH}/lib/libecl.a
+         ${ERT_ROOT_PATH}/lib/libert_util.a
+         ${ERT_ROOT_PATH}/lib/libgeometry.a
+         ${ERT_ROOT_PATH}/lib/libwell.a )
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     set( ERT_LIBRARY_LIST 
          ${ERT_ROOT_PATH}/lib/ecl.lib
@@ -93,6 +101,9 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 endif()
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+   list(APPEND ERT_LIBRARY_LIST lapack z)  
+endif()
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
    list(APPEND ERT_LIBRARY_LIST lapack z)  
 endif()	
 

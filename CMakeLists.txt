@@ -4,7 +4,7 @@ project (ResInsight)
 
 set (VIZ_MODULES_FOLDER_NAME VisualizationModules)
 
-
+MESSAGE( STATUS "CMAKE_SYSTEM_NAME:         " ${CMAKE_SYSTEM_NAME} )
 # Setup the main platform defines
 #-----------------------------------------------------
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
@@ -14,7 +14,7 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 else()
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
 endif()
-
+MESSAGE( STATUS "CMAKE_SYSTEM_NAME:         " ${CMAKE_SYSTEM_NAME} )
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
         # Linux specific code
         set(CMAKE_CXX_FLAGS 		"-DCVF_LINUX -DUSE_ECL_LIB -pipe -Wextra -Woverloaded-virtual -Wformat")
@@ -23,8 +23,10 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
         #set(CMAKE_EXE_LINKER_FLAGS  "-Xlinker -rpath .")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
 #        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -g1")
+ELSEIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -DUSE_ECL_LIB")	
 ELSE()
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /openmp -DUSE_ECL_LIB")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /openmp	-DUSE_ECL_LIB")	
 ENDIF() 
 
 
@@ -111,7 +113,11 @@ set (CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/Install/)
 # Application 
 ################################################################################
 add_subdirectory(ApplicationCode)
-add_subdirectory(OctavePlugin)
+
+# Do not build Octave plugins for Windows 64-bit, as there is no precompiled 64-bit Octave available
+if (NOT CMAKE_CL_64)
+    add_subdirectory(OctavePlugin)
+endif()
 #
 
 ################################################################################
