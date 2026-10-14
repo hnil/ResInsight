@@ -23,6 +23,7 @@
 
 #include "cafAssert.h"
 
+#include <algorithm>
 #include <array>
 #include <climits>
 #include <cmath>
@@ -56,6 +57,22 @@ void RigFemPartGrid::setFemPart( const RigFemPart* femPart, bool invertIJK )
 //--------------------------------------------------------------------------------------------------
 void RigFemPartGrid::generateStructGridData( bool invertIJK )
 {
+    // IJK given by the file reader, e.g. for grids with faults where the neighbor walk below stops
+    if ( !m_femPart->elementIJK().empty() )
+    {
+        m_ijkPrElement     = m_femPart->elementIJK();
+        m_elementIJKCounts = cvf::Vec3st( 0, 0, 0 );
+        for ( const auto& ijk : m_ijkPrElement )
+        {
+            for ( int d = 0; d < 3; d++ )
+            {
+                m_elementIJKCounts[d] = std::max( m_elementIJKCounts[d], static_cast<size_t>( ijk[d] + 1 ) );
+            }
+        }
+        buildIJKLookup();
+        return;
+    }
+
     //[X] 1. Calculate neighbors for each element
     //[X]    record the ones with 3 or fewer neighbors as possible grid corners
     //[X] 2. Loop over the possible corner cells,
@@ -179,8 +196,6 @@ void RigFemPartGrid::generateStructGridData( bool invertIJK )
         if ( kCoord > static_cast<int>( m_elementIJKCounts[2] ) ) m_elementIJKCounts[2] = kCoord;
     }
 
-    m_elmIdxPrIJK.resize( m_elementIJKCounts[0], m_elementIJKCounts[1], m_elementIJKCounts[2] );
-
     if ( invertIJK )
     {
         size_t iCount = m_elementIJKCounts[0];
@@ -193,6 +208,16 @@ void RigFemPartGrid::generateStructGridData( bool invertIJK )
             if ( ijk[2] >= 0 ) ijk[2] = static_cast<int>( kCount ) - 1 - ijk[2];
         }
     }
+
+    buildIJKLookup();
+}
+
+//--------------------------------------------------------------------------------------------------
+///
+//--------------------------------------------------------------------------------------------------
+void RigFemPartGrid::buildIJKLookup()
+{
+    m_elmIdxPrIJK.resize( m_elementIJKCounts[0], m_elementIJKCounts[1], m_elementIJKCounts[2] );
 
     for ( int elmIdx = 0; elmIdx < m_femPart->elementCount(); ++elmIdx )
     {
