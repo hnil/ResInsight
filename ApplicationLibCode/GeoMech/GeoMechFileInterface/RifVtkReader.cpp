@@ -226,6 +226,25 @@ bool RifVtkReader::readFemParts( RigFemPartCollection* femParts )
         // which flips the IJK directions. Invert all so IJK=0 is at the correct corner.
         femPart->setInvertIJKInStructGrid( true );
 
+        // Logical cell indices from the simulator, if written. Needed where cells are not connected
+        // through shared nodes, e.g. across faults.
+        if ( !properties[partId].empty() )
+        {
+            const auto& firstStep = properties[partId].front();
+            if ( auto it = firstStep.find( "ijk" ); it != firstStep.end() && it->second.size() == 3 * static_cast<size_t>( elmCount ) )
+            {
+                std::vector<cvf::Vec3i> elementIJK( elmCount );
+                for ( int elmIdx = 0; elmIdx < elmCount; ++elmIdx )
+                {
+                    for ( int d = 0; d < 3; d++ )
+                    {
+                        elementIJK[elmIdx][d] = static_cast<int>( it->second[3 * elmIdx + d] );
+                    }
+                }
+                femPart->setElementIJK( elementIJK );
+            }
+        }
+
         femPart->setElementPartId( femParts->partCount() );
         femParts->addFemPart( femPart );
 

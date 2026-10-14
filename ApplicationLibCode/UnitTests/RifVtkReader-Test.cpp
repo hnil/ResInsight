@@ -3,6 +3,7 @@
 #include "RiaTestDataDirectory.h"
 
 #include "RigFemPartCollection.h"
+#include "RigFemPartGrid.h"
 
 #include <gtest/gtest.h>
 
@@ -242,4 +243,27 @@ TEST( RifVtkReaderTest, ReadElementNodalStressFromCellsAndPor )
         EXPECT_FLOAT_EQ( s[c][idx], expectedS[c] );
         EXPECT_FLOAT_EQ( e[c][idx], expectedE[c] );
     }
+}
+
+//--------------------------------------------------------------------------------------------------
+/// A cell array "ijk" gives the logical cell indices instead of deriving them from neighbors
+//--------------------------------------------------------------------------------------------------
+TEST( RifVtkReaderTest, ReadGivenIJK )
+{
+    RifVtkReader reader;
+    reader.openFile( ( testDataDir() / "model.pvd" ).string(), nullptr );
+
+    cvf::ref<RigFemPartCollection> femParts = new RigFemPartCollection();
+    reader.readFemParts( femParts.p() );
+
+    // The two side-by-side elements are given as one column of two layers
+    const RigFemPartGrid* grid = femParts->part( 0 )->getOrCreateStructGrid();
+    EXPECT_EQ( grid->cellCountI(), 1u );
+    EXPECT_EQ( grid->cellCountJ(), 1u );
+    EXPECT_EQ( grid->cellCountK(), 2u );
+
+    size_t i = 0, j = 0, k = 0;
+    ASSERT_TRUE( grid->ijkFromCellIndex( 0, &i, &j, &k ) );
+    EXPECT_EQ( k, 1u );
+    EXPECT_EQ( grid->cellIndexFromIJK( 0, 0, 0 ), 1u );
 }

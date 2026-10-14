@@ -48,6 +48,7 @@ public:
 
 private:
     void generateStructGridData( bool invertIJK );
+    void buildIJKLookup();
     int  findElmIdxForIJK000();
     int  perpendicularFaceInDirection( cvf::Vec3f direction, int perpFaceIdx, int elmIdx );
 
