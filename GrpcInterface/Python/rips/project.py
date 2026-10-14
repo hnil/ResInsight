@@ -21,6 +21,7 @@ import KeyValueStore_pb2
 
 from .resinsight_classes import (
     ColorLegendCollection,
+    GeoMechCase,
     PlotWindow,
     Project,
     Reservoir,
@@ -79,8 +80,10 @@ def close(self) -> None:
 
 
 @add_method(Project)
-def load_case(self: Project, path: str, grid_only: bool = False) -> Reservoir:
-    """Load a new grid case from the given file path
+def load_case(
+    self: Project, path: str, grid_only: bool = False
+) -> Optional[Reservoir | GeoMechCase]:
+    """Load a new grid case, or a geomechanical case (.odb, .inp, .pvd), from the given file path
 
     Arguments:
         path(str): file path to case
@@ -90,7 +93,11 @@ def load_case(self: Project, path: str, grid_only: bool = False) -> Reservoir:
     command_reply = self._execute_command(
         loadCase=Commands_pb2.FilePathRequest(path=path, gridOnly=grid_only)
     )
-    return self.case(command_reply.loadCaseResult.id)
+    case_id = command_reply.loadCaseResult.id
+    case = self.case(case_id)
+    if case is None:
+        case = next((c for c in self.descendants(GeoMechCase) if c.id == case_id), None)
+    return case
 
 
 @add_method(Project)

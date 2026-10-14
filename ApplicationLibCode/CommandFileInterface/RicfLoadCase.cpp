@@ -20,12 +20,18 @@
 #include "RicfLoadCase.h"
 
 #include "RiaApplication.h"
+#include "RiaDefines.h"
 #include "RiaLogging.h"
 #include "RiaPreferencesGrid.h"
 
 #include "RicImportGeneralDataFeature.h"
 
 #include "RifReaderSettings.h"
+
+#include "RimGeoMechCase.h"
+#include "RimGeoMechModels.h"
+#include "RimOilField.h"
+#include "RimProject.h"
 
 #include "cafPdmFieldScriptingCapability.h"
 
@@ -66,6 +72,21 @@ caf::PdmScriptResponse RicfLoadCase::execute()
     {
         QDir startDir( RiaApplication::instance()->startDir() );
         absolutePath = startDir.absoluteFilePath( m_path );
+    }
+
+    if ( RiaDefines::isGeoMechFileType( RiaDefines::obtainFileTypeFromFileName( absolutePath ) ) )
+    {
+        if ( !RiaApplication::instance()->openOdbCaseFromFile( absolutePath ) )
+        {
+            QString error = QString( "loadCase: Unable to load geomechanical case from %1" ).arg( absolutePath );
+            RiaLogging::error( error.toStdString() );
+            return caf::PdmScriptResponse( caf::PdmScriptResponse::COMMAND_ERROR, error );
+        }
+
+        caf::PdmScriptResponse response;
+        auto                   geoMechCases = RimProject::current()->activeOilField()->geoMechModels()->cases();
+        response.setResult( new RicfLoadCaseResult( geoMechCases.back()->caseId() ) );
+        return response;
     }
 
     RifReaderSettings readerSettings = m_gridOnly ? RiaPreferencesGrid::gridOnlyReaderSettings()
