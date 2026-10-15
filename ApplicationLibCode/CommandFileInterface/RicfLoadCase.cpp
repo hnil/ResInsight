@@ -24,6 +24,7 @@
 #include "RiaLogging.h"
 #include "RiaPreferencesGrid.h"
 
+#include "RicImportEclipseCaseFeature.h"
 #include "RicImportGeneralDataFeature.h"
 
 #include "RifReaderSettings.h"
@@ -92,6 +93,8 @@ caf::PdmScriptResponse RicfLoadCase::execute()
     RifReaderSettings readerSettings = m_gridOnly ? RiaPreferencesGrid::gridOnlyReaderSettings()
                                                   : RiaPreferencesGrid::current()->readerSettings();
 
+    auto viewsBefore = RicImportEclipseCaseFeature::allEclipseViews( RimProject::current() );
+
     bool createPlot = false;
     bool createView = false;
     auto fileOpenMetaData =
@@ -103,6 +106,9 @@ caf::PdmScriptResponse RicfLoadCase::execute()
         RiaLogging::error( error.toStdString() );
         return caf::PdmScriptResponse( caf::PdmScriptResponse::COMMAND_ERROR, error );
     }
+
+    // Surfaces beside the grid (e.g. fractures), as the GUI import does
+    RicImportEclipseCaseFeature::importPvdSurfacesForGridFiles( QStringList{ absolutePath }, viewsBefore );
 
     caf::PdmScriptResponse response;
     response.setResult( new RicfLoadCaseResult( fileOpenMetaData.createdCaseIds.front() ) );
