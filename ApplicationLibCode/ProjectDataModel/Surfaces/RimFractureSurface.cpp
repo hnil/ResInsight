@@ -20,10 +20,14 @@
 
 #include "RiaLogging.h"
 
+#include "RigCaseCellResultsData.h"
 #include "RigStatisticsMath.h"
 #include "Surface/RigSurface.h"
 #include "Surface/RigTriangleMeshData.h"
 
+#include "Rim3dView.h"
+#include "RimCase.h"
+#include "RimEclipseCase.h"
 #include "RimRegularLegendConfig.h"
 #include "RimSurfaceCollection.h"
 
@@ -127,6 +131,44 @@ bool RimFractureSurface::loadSurfaceDataForTimeStep( int timeStep )
     setSurfaceData( surface );
 
     return true;
+}
+
+//--------------------------------------------------------------------------------------------------
+/// The .pvd entry at or just before the view's time; pvd times are seconds since simulation start
+//--------------------------------------------------------------------------------------------------
+int RimFractureSurface::timeStepIndexForView( const Rim3dView* view, int viewTimeStep )
+{
+    if ( m_surfacePerTimeStep.empty() ) loadDataFromFile();
+    if ( m_secondsSinceSimulationStart.empty() || viewTimeStep < 0 || !view || !view->ownerCase() ) return viewTimeStep;
+
+    std::vector<double> viewDays;
+    if ( auto eclipseCase = dynamic_cast<const RimEclipseCase*>( view->ownerCase() ) )
+    {
+        if ( auto results = eclipseCase->results( RiaDefines::PorosityModelType::MATRIX_MODEL ) )
+        {
+            viewDays = results->daysSinceSimulationStart();
+        }
+    }
+    if ( viewDays.empty() )
+    {
+        // Without a simulation start, count from the first date of the case
+        auto dates = view->ownerCase()->timeStepDates();
+        for ( const auto& d : dates )
+        {
+            viewDays.push_back( dates.front().msecsTo( d ) / ( 1000.0 * 86400.0 ) );
+        }
+    }
+    if ( viewTimeStep >= static_cast<int>( viewDays.size() ) ) return viewTimeStep;
+
+    const double viewSeconds = viewDays[viewTimeStep] * 86400.0;
+    const double tolerance   = 1.0;
+
+    int index = 0;
+    for ( size_t i = 0; i < m_secondsSinceSimulationStart.size(); ++i )
+    {
+        if ( m_secondsSinceSimulationStart[i] <= viewSeconds + tolerance ) index = static_cast<int>( i );
+    }
+    return index;
 }
 
 //--------------------------------------------------------------------------------------------------

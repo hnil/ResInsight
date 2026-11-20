@@ -243,6 +243,14 @@ size_t RimSurface::timeStepCount() const
 //--------------------------------------------------------------------------------------------------
 ///
 //--------------------------------------------------------------------------------------------------
+int RimSurface::timeStepIndexForView( const Rim3dView* view, int viewTimeStep )
+{
+    return viewTimeStep;
+}
+
+//--------------------------------------------------------------------------------------------------
+///
+//--------------------------------------------------------------------------------------------------
 void RimSurface::fieldChangedByUi( const caf::PdmFieldHandle* changedField, const QVariant& oldValue, const QVariant& newValue )
 {
     bool updateViews = false;

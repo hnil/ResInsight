@@ -29,6 +29,7 @@
 
 #include <vector>
 
+class Rim3dView;
 class RimRegularLegendConfig;
 class RigSurface;
 
@@ -64,6 +65,7 @@ public:
 
     virtual bool   loadSurfaceDataForTimeStep( int timeStep );
     virtual size_t timeStepCount() const;
+    virtual int    timeStepIndexForView( const Rim3dView* view, int viewTimeStep );
 
     virtual QString     fullName() const;
     virtual bool        onLoadData() = 0;

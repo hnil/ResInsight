@@ -38,6 +38,7 @@ public:
 
     bool   loadSurfaceDataForTimeStep( int timeStep ) override;
     size_t timeStepCount() const override;
+    int    timeStepIndexForView( const Rim3dView* view, int viewTimeStep ) override;
 
     std::vector<std::vector<double>> valuesForProperty( const QString& propertyName ) const;
 
@@ -56,6 +57,6 @@ private:
 
     caf::PdmField<caf::FilePath> m_surfaceDefinitionFilePath;
 
-    std::vector<size_t>                               m_secondsSinceSimulationStart;
+    std::vector<double>                               m_secondsSinceSimulationStart;
     std::vector<std::unique_ptr<RigTriangleMeshData>> m_surfacePerTimeStep;
 };
