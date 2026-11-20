@@ -447,7 +447,12 @@ bool RimProject::writeProjectFile()
     m_globalPathList = RiaProjectFileTools::transferPathsToGlobalPathList( this );
 
     QFile xmlFile( fileName() );
-    if ( !xmlFile.open( QIODevice::WriteOnly | QIODevice::Text ) ) return false;
+    if ( !xmlFile.open( QIODevice::WriteOnly | QIODevice::Text ) )
+    {
+        // The paths now hold path ids; restore them or the next save maps each id to itself
+        RiaProjectFileTools::distributePathsFromGlobalPathList( this, m_globalPathList() );
+        return false;
+    }
 
     QString content = documentAsString();
     xmlFile.write( content.toUtf8() );
