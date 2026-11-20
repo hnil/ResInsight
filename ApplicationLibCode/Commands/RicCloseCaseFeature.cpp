@@ -110,6 +110,26 @@ void RicCloseCaseFeature::onActionTriggered( bool isChecked )
 }
 
 //--------------------------------------------------------------------------------------------------
+/// Close one case without asking; for scripting
+//--------------------------------------------------------------------------------------------------
+void RicCloseCaseFeature::closeCase( RimCase* rimCase )
+{
+    if ( auto eclipseCase = dynamic_cast<RimEclipseCase*>( rimCase ) )
+    {
+        deleteEclipseCase( eclipseCase );
+    }
+    else if ( auto geoMechCase = dynamic_cast<RimGeoMechCase*>( rimCase ) )
+    {
+        deleteGeoMechCase( geoMechCase );
+    }
+    else
+    {
+        return;
+    }
+    if ( RiuMainWindow::instance() ) RiuMainWindow::instance()->cleanupGuiCaseClose();
+}
+
+//--------------------------------------------------------------------------------------------------
 ///
 //--------------------------------------------------------------------------------------------------
 void RicCloseCaseFeature::setupActionLook( QAction* actionToSetup )

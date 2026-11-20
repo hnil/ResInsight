@@ -36,6 +36,7 @@ class RicCloseCaseFeature : public caf::CmdFeature
     CAF_CMD_HEADER_INIT;
 
 public:
+    static void closeCase( RimCase* rimCase );
     static void deleteEclipseCase( RimEclipseCase* eclipseCase );
     static bool userConfirmedGridCaseGroupChange( const std::vector<RimEclipseCase*>& casesToBeDeleted );
 
@@ -47,7 +48,7 @@ protected:
 private:
     std::vector<RimCase*> selectedCases() const;
 
-    void deleteGeoMechCase( RimGeoMechCase* geoMechCase );
+    static void deleteGeoMechCase( RimGeoMechCase* geoMechCase );
 
     static bool hasAnyStatisticsResults( RimIdenticalGridCaseGroup* gridCaseGroup );
     static void removeCaseFromAllGroups( RimEclipseCase* eclipseCase );

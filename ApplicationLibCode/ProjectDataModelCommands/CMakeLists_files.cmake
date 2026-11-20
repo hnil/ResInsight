@@ -26,6 +26,7 @@ set(SOURCE_GROUP_SOURCE_FILES
     ${CMAKE_CURRENT_LIST_DIR}/RimcThermalFractureTemplate.cpp
     ${CMAKE_CURRENT_LIST_DIR}/RimcIntersection.cpp
     ${CMAKE_CURRENT_LIST_DIR}/RimcCornerPointCase.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/RimcCase.cpp
     ${CMAKE_CURRENT_LIST_DIR}/RimcEclipseCase.cpp
     ${CMAKE_CURRENT_LIST_DIR}/RimcEclipseStatisticsCase.cpp
     ${CMAKE_CURRENT_LIST_DIR}/RimcGridView.cpp
