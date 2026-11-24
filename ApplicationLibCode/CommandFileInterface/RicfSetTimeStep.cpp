@@ -23,6 +23,7 @@
 #include "RimEclipseCaseCollection.h"
 #include "RimOilField.h"
 #include "RimProject.h"
+#include "RimViewLinker.h"
 
 #include "RiaLogging.h"
 
@@ -109,6 +110,7 @@ caf::PdmScriptResponse RicfSetTimeStep::execute()
         {
             view->setCurrentTimeStepAndUpdate( m_timeStepIndex );
             view->createDisplayModelAndRedraw();
+            if ( auto* viewLinker = view->assosiatedViewLinker() ) viewLinker->updateTimeStep( view, m_timeStepIndex );
         }
     }
 
