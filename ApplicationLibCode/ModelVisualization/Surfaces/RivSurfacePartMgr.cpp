@@ -141,8 +141,12 @@ void RivSurfacePartMgr::appendIntersectionGeometryPartsToModel( cvf::ModelBasicL
     bool includeCellResults  = ( surfaceColorMode == SurfaceColorMode::BOTH || surfaceColorMode == SurfaceColorMode::RESULT_COLORS );
     bool includeSurfaceColor = ( surfaceColorMode == SurfaceColorMode::BOTH || surfaceColorMode == SurfaceColorMode::SURFACE_COLOR );
 
+    // A checked surface result replaces the cell results, so the surface is drawn natively in its colours.
+    const bool surfaceResultChecked = m_surfaceInView->surfaceResultDefinition()->isChecked();
+    if ( includeCellResults && surfaceResultChecked ) includeSurfaceColor = true;
+
     if ( includeCellResults && m_surfaceInView->surface() && m_surfaceInView->surface()->showIntersectionCellResults() &&
-         !m_surfaceInView->surfaceResultDefinition()->isChecked() )
+         !surfaceResultChecked )
     {
         if ( m_intersectionFaces.isNull() )
         {
