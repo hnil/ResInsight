@@ -54,7 +54,8 @@ RimCellFilter::RimCellFilter( FilterDefinitionType defType )
 {
     CAF_PDM_InitObject( "Cell Filter" );
 
-    // The base class uses "UserDescription" as field keyword - no alias needed for m_name
+    // Projects written before the move to RimNamedObject store the name as "UserDescription"
+    nameField()->registerKeywordAlias( "UserDescription" );
     setName( "New filter" );
 
     m_isChecked.registerKeywordAlias( "Active" );
