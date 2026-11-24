@@ -105,20 +105,71 @@ void RimViewLinker::updateTimeStep( Rim3dView* sourceView, int timeStep )
         }
     }
 
+    // Steps are resolved against the master: by index, or by date for controllers that sync by date
+    int masterTimeStep = timeStep;
+    if ( m_masterView && sourceView != m_masterView && sourceView->viewController()->isTimeStepSyncedByDate() )
+    {
+        const int step = timeStepAtOrBeforeDate( m_masterView, dateOfTimeStep( sourceView, timeStep ) );
+        if ( step >= 0 ) masterTimeStep = step;
+    }
+
     if ( m_masterView && m_masterView->viewer() && sourceView != m_masterView )
     {
-        m_masterView->viewer()->setCurrentFrame( timeStep );
+        m_masterView->viewer()->setCurrentFrame( masterTimeStep );
     }
+
+    const QDateTime masterDate = m_masterView ? dateOfTimeStep( m_masterView, masterTimeStep ) : QDateTime();
 
     for ( RimViewController* viewController : m_viewControllers )
     {
         if ( !viewController->isTimeStepLinked() ) continue;
 
-        if ( viewController->managedView() && viewController->managedView() != sourceView && viewController->managedView()->viewer() )
+        Rim3dView* view = viewController->managedView();
+        if ( view && view != sourceView && view->viewer() )
         {
-            viewController->managedView()->viewer()->setCurrentFrame( timeStep );
+            int viewTimeStep = masterTimeStep;
+            if ( viewController->isTimeStepSyncedByDate() )
+            {
+                const int step = timeStepAtOrBeforeDate( view, masterDate );
+                if ( step >= 0 ) viewTimeStep = step;
+            }
+
+            view->viewer()->setCurrentFrame( viewTimeStep );
         }
     }
+}
+
+//--------------------------------------------------------------------------------------------------
+///
+//--------------------------------------------------------------------------------------------------
+QDateTime RimViewLinker::dateOfTimeStep( const Rim3dView* view, int timeStep )
+{
+    if ( !view || !view->ownerCase() || timeStep < 0 ) return {};
+
+    auto dates = view->ownerCase()->timeStepDates();
+    if ( timeStep >= static_cast<int>( dates.size() ) ) return {};
+
+    return dates[timeStep];
+}
+
+//--------------------------------------------------------------------------------------------------
+/// The last step at or before the date; the first step if all are later. -1 if there is nothing to match
+//--------------------------------------------------------------------------------------------------
+int RimViewLinker::timeStepAtOrBeforeDate( const Rim3dView* view, const QDateTime& date )
+{
+    if ( !date.isValid() || !view || !view->ownerCase() ) return -1;
+
+    auto dates = view->ownerCase()->timeStepDates();
+    if ( dates.empty() ) return -1;
+
+    const qint64 toleranceMsecs = 1000;
+
+    int index = 0;
+    for ( size_t i = 0; i < dates.size(); ++i )
+    {
+        if ( date.msecsTo( dates[i] ) <= toleranceMsecs ) index = static_cast<int>( i );
+    }
+    return index;
 }
 
 //--------------------------------------------------------------------------------------------------

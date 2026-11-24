@@ -80,6 +80,12 @@ RimViewController::RimViewController()
     CAF_PDM_InitField( &m_syncCamera, "SyncCamera", true, "Camera" );
     CAF_PDM_InitField( &m_showCursor, "ShowCursor", true, "   Show Cursor" );
     CAF_PDM_InitField( &m_syncTimeStep, "SyncTimeStep", true, "Time Step" );
+    CAF_PDM_InitField( &m_syncTimeStepByDate,
+                       "SyncTimeStepByDate",
+                       false,
+                       "   By Date",
+                       "",
+                       "Show the step at or just before the master view's date instead of the same step index" );
     CAF_PDM_InitField( &m_syncCellResult, "SyncCellResult", false, "Cell Result" );
     CAF_PDM_InitField( &m_syncLegendDefinitions, "SyncLegendDefinitions", true, "   Color Legend" );
 
@@ -174,7 +180,7 @@ void RimViewController::fieldChangedByUi( const caf::PdmFieldHandle* changedFiel
     {
         updateCameraLink();
     }
-    else if ( changedField == &m_syncTimeStep )
+    else if ( changedField == &m_syncTimeStep || changedField == &m_syncTimeStepByDate )
     {
         updateTimeStepLink();
     }
@@ -463,6 +469,8 @@ void RimViewController::defineUiOrdering( QString uiConfigName, caf::PdmUiOrderi
     scriptGroup->add( &m_syncCamera );
     scriptGroup->add( &m_showCursor );
     scriptGroup->add( &m_syncTimeStep );
+    scriptGroup->add( &m_syncTimeStepByDate );
+    m_syncTimeStepByDate.uiCapability()->setUiReadOnly( !m_syncTimeStep );
     scriptGroup->add( &m_syncCellResult );
     scriptGroup->add( &m_syncLegendDefinitions );
 
@@ -790,6 +798,14 @@ bool RimViewController::isTimeStepLinked() const
     }
 
     return false;
+}
+
+//--------------------------------------------------------------------------------------------------
+///
+//--------------------------------------------------------------------------------------------------
+bool RimViewController::isTimeStepSyncedByDate() const
+{
+    return isTimeStepLinked() && m_syncTimeStepByDate;
 }
 
 //--------------------------------------------------------------------------------------------------

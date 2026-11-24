@@ -27,6 +27,8 @@
 
 #include "cvfVector3.h"
 
+#include <QDateTime>
+
 #include "RimNamedObject.h"
 
 namespace caf
@@ -102,7 +104,9 @@ protected:
     void onChildDeleted( caf::PdmChildArrayFieldHandle* childArray, std::vector<caf::PdmObjectHandle*>& referringObjects ) override;
 
 private:
-    static QString displayNameForView( Rim3dView* view );
+    static QString   displayNameForView( Rim3dView* view );
+    static QDateTime dateOfTimeStep( const Rim3dView* view, int timeStep );
+    static int       timeStepAtOrBeforeDate( const Rim3dView* view, const QDateTime& date );
 
     void allViewsForCameraSync( const Rim3dView* source, std::vector<Rim3dView*>& views ) const;
 

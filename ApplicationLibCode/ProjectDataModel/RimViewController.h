@@ -62,6 +62,7 @@ public:
     bool isCameraLinked() const;
     bool showCursor() const;
     bool isTimeStepLinked() const;
+    bool isTimeStepSyncedByDate() const;
 
     bool isResultColorControlled() const;
     bool isLegendDefinitionsControlled() const;
@@ -114,6 +115,7 @@ private:
     caf::PdmField<bool> m_syncCamera;
     caf::PdmField<bool> m_showCursor;
     caf::PdmField<bool> m_syncTimeStep;
+    caf::PdmField<bool> m_syncTimeStepByDate;
 
     caf::PdmField<bool> m_syncCellResult;
     caf::PdmField<bool> m_syncLegendDefinitions;
