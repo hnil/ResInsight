@@ -24,13 +24,34 @@
 
 QString RimFilterDisplayUtil::filterNamesJoined( const std::vector<RimCellFilter*>& filters, bool useAndOperation )
 {
-    QStringList names;
+    // Include filters of one kind add up; the combine mode applies only between index and other filters.
+    QStringList indexNames, otherNames, excludeNames;
     for ( auto* f : filters )
     {
-        if ( f && f->isFilterEnabled() ) names << f->name();
+        if ( !f || !f->isFilterEnabled() ) continue;
+        if ( f->filterMode() == RimCellFilter::EXCLUDE )
+            excludeNames << f->name();
+        else if ( f->isIndexFilter() )
+            indexNames << f->name();
+        else
+            otherNames << f->name();
     }
-    if ( names.isEmpty() ) return {};
 
-    const QString sep = useAndOperation ? QStringLiteral( " AND " ) : QStringLiteral( " OR " );
-    return names.join( sep );
+    auto group = []( const QStringList& names, bool parenthesize )
+    {
+        const QString joined = names.join( QStringLiteral( " OR " ) );
+        return ( parenthesize && names.size() > 1 ) ? QStringLiteral( "(%1)" ).arg( joined ) : joined;
+    };
+
+    QStringList parts;
+    const bool  both = !indexNames.isEmpty() && !otherNames.isEmpty();
+    if ( !otherNames.isEmpty() ) parts << group( otherNames, both );
+    if ( !indexNames.isEmpty() ) parts << group( indexNames, both );
+
+    QString text = parts.join( useAndOperation ? QStringLiteral( " AND " ) : QStringLiteral( " OR " ) );
+    for ( const auto& name : excludeNames )
+    {
+        text += text.isEmpty() ? QStringLiteral( "NOT %1" ).arg( name ) : QStringLiteral( " AND NOT %1" ).arg( name );
+    }
+    return text;
 }
